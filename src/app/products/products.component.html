@@ -3,7 +3,8 @@
     <div class="card-body">
       <div class="card-body">
         <input type="text" [ngModel]="keyword">
-        <button  class="btn btn-outline-success">
+        <button (click)="getProduct()"
+                 class="btn btn-outline-success">
 
           <i class="bi bi-search"></i>
         </button>
@@ -24,8 +25,13 @@
             </button>
           </td>
           <td>
-            <button (click)="handleDelete (product)" class="btn btn-outline-danger">
+            <button (click)="handleDelete(product)" class="btn btn-outline-danger">
               <i class="bi bi-trash"></i>
+            </button>
+          </td>
+          <td>
+            <button (click)="handleEdit (product)" class="btn btn-outline-danger">
+              <i class="bi bi-pencil"></i>
             </button>
           </td>
 
@@ -33,6 +39,16 @@
 
         </tbody>
       </table>
+      <ul class="nav nav-pills">
+        <li *ngFor="let page of [].constructor(this.totalPages); let i=index">
+          <button (click)="handleGotoPage(i+1)"
+                  [ngClass]="currentPage==(i+1)? 'btn btn-success m-1'
+                  : 'btn btn-outline-success m-1'"
+                  >
+            {{i+1}}
+          </button>
+        </li>
+      </ul>
     </div>
   </div>
 

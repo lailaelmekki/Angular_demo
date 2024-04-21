@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {ProductService} from "../services/product.service";
 import {Product} from "../modele/product.model";
 import {Observable} from "rxjs";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-products',
@@ -11,10 +12,13 @@ import {Observable} from "rxjs";
 export class ProductsComponent implements   OnInit {
   public products :Array<Product>=[];
   public keyword: string="";
+  totalPages:number=0;
+  pageSize:number=3;
+  currentPage :number=1;
 
   //products$ !:Observable<Array<Product>>
 
-  constructor(private productService:ProductService
+  constructor(private productService:ProductService , private router: Router
   ) {
   }
   ngOnInit() {
@@ -27,11 +31,18 @@ export class ProductsComponent implements   OnInit {
 
   getProduct(){
 
-    this.productService.getProducts(1,2)
+    this.productService.getProducts(this.keyword,this.currentPage,this.pageSize )
       .subscribe({
-        next:data=> {
-          this.products = data
-        },
+        next: (resp)=> {
+          this.products = resp.body as Product[];
+          let totalProducts:number=parseInt(resp.headers.get('x-total-count')!);
+          //const totalProducts = this.products.length;
+          this.totalPages=Math.floor(totalProducts / this.pageSize);
+          if(totalProducts % this.pageSize !=0){
+            this.totalPages=this.totalPages+1;
+          }
+          console.log(this.totalPages);
+          },
         error: err=>{
           console.log(err);
         }
@@ -39,6 +50,7 @@ export class ProductsComponent implements   OnInit {
 
     // this.products$=this.productService.getProducts();
   }
+
   handleCheckProduct(product: Product) {
     this.productService.checkProduct(product)
 
@@ -61,4 +73,15 @@ export class ProductsComponent implements   OnInit {
   }
 
 
+  handleGotoPage(page: number) {
+    this.currentPage=page;
+    this.getProduct();
+
+  }
+
+  handleEdit(product: Product) {
+    this.router.navigateByUrl(`/editProduct/${product.id}`)
+
+
+  }
 }
