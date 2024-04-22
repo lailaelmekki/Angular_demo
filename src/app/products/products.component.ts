@@ -3,6 +3,7 @@ import {ProductService} from "../services/product.service";
 import {Product} from "../modele/product.model";
 import {Observable} from "rxjs";
 import {Router} from "@angular/router";
+import {AppStateService} from "../services/app-state.service";
 
 @Component({
   selector: 'app-products',
@@ -10,15 +11,11 @@ import {Router} from "@angular/router";
   styleUrl: './products.component.css'
 })
 export class ProductsComponent implements   OnInit {
-  public products :Array<Product>=[];
-  public keyword: string="";
-  totalPages:number=0;
-  pageSize:number=3;
-  currentPage :number=1;
+
 
   //products$ !:Observable<Array<Product>>
 
-  constructor(private productService:ProductService , private router: Router
+  constructor(private productService:ProductService , private router: Router,public appState:AppStateService
   ) {
   }
   ngOnInit() {
@@ -30,23 +27,33 @@ export class ProductsComponent implements   OnInit {
   }
 
   getProduct(){
-
-    this.productService.getProducts(this.keyword,this.currentPage,this.pageSize )
-      .subscribe({
-        next: (resp)=> {
-          this.products = resp.body as Product[];
-          let totalProducts:number=parseInt(resp.headers.get('x-total-count')!);
-          //const totalProducts = this.products.length;
-          this.totalPages=Math.floor(totalProducts / this.pageSize);
-          if(totalProducts % this.pageSize !=0){
-            this.totalPages=this.totalPages+1;
+    this.appState.setProductState({
+      status: "LOADING"
+    })
+    this.productService.getProducts(this.appState.productState.keyword,this.appState.productState.currentPage,this.appState.productState.pageSize)
+        .subscribe({
+          next : (resp) =>{
+            let products=resp.body as Product[];
+            let totalProducts:number=parseInt(resp.headers.get('x-total-count')!)
+            //this.appState.productsState.totalProducts=totalProducts;
+            let totalPages=Math.floor(totalProducts/ this.appState.productState.pageSize);
+            if(totalProducts% this.appState.productState.pageSize!=0){
+              ++totalPages;
+            }
+            this.appState.setProductState({
+              products:products,
+              totalProducts : totalProducts,
+              totalPages : totalPages,
+              status: "LOADED"
+            })
+          } ,
+          error : err => {
+            this.appState.setProductState({
+              status: "ERROR",
+              errorMessage : err
+            })
           }
-          console.log(this.totalPages);
-          },
-        error: err=>{
-          console.log(err);
-        }
-      })
+        })
 
     // this.products$=this.productService.getProducts();
   }
@@ -67,14 +74,14 @@ export class ProductsComponent implements   OnInit {
       this.productService.deleteProduct(product).subscribe({
         next:value => {
            //this.getProduct();
-          this.products=this.products.filter(p=>p.id!=product.id);
+          this.appState.productState.products=this.appState.productState.products.filter((p:any)=>p.id!=product.id);
         }
       })
   }
 
 
   handleGotoPage(page: number) {
-    this.currentPage=page;
+    this.appState.productState.currentPage=page;
     this.getProduct();
 
   }

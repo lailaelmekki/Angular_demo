@@ -6,9 +6,12 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { ProductsComponent } from './products/products.component';
 import { NewProductComponent } from './new-product/new-product.component';
-import {HttpClientModule} from "@angular/common/http";
+import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import { EditProductComponent } from './edit-product/edit-product.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { NavbarComponent } from './navbar/navbar.component';
+import { AppErrorComponent } from './app-error/app-error.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +19,10 @@ import { EditProductComponent } from './edit-product/edit-product.component';
     HomeComponent,
     ProductsComponent,
     NewProductComponent,
-    EditProductComponent
+    EditProductComponent,
+    DashboardComponent,
+    NavbarComponent,
+    AppErrorComponent
   ],
   imports: [
     BrowserModule,
@@ -25,7 +31,9 @@ import { EditProductComponent } from './edit-product/edit-product.component';
     ReactiveFormsModule,
     FormsModule
   ],
-  providers: [],
+  providers: [
+
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
